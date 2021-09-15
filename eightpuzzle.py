@@ -26,6 +26,22 @@ class State:
             s += "\n"
         return s
     
+    def __lt__(self, other):
+        """
+        Overload the less than operator so that ties can
+        be broken automatically in a heap without crashing
+        Parameters
+        ----------
+        other: State
+            Another state
+        
+        Returns
+        -------
+        Result of < on string comparison of __str__ from self
+        and other
+        """
+        return str(self) < str(other)
+    
     def copy(self):
         """
         Return a deep copy of this state
