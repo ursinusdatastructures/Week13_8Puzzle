@@ -13,7 +13,7 @@ class State:
         self.tiles = tiles
         self.prev = None
     
-    def __str__(self):
+    def __repr__(self):
         """
         Returns
         -------
