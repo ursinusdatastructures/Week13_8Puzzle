@@ -1,5 +1,3 @@
-# https://murhafsousli.github.io/8puzzle
-
 class State:
     def __init__(self, tiles):
         """
@@ -89,7 +87,6 @@ class State:
             element is this state and the last element is the goal
         """
         visited = {}
-        expanded = 1
         queue = [self]
         finished = False
         # TODO: Fill this in
