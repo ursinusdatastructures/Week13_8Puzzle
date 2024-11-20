@@ -11,6 +11,7 @@ class State:
         self.tiles = tiles
         self.prev = None
     
+
     def __repr__(self):
         """
         Returns
@@ -24,6 +25,18 @@ class State:
             s += "\n"
         return s
     
+    def __eq__(self, other):
+        ret = True
+        N = len(self.tiles)
+        for i in range(N):
+            for j in range(N):
+                ret = ret and self.tiles[i][j] == other.tiles[i][j]
+        return ret
+    
+
+    def __hash__(self):
+        return hash(tuple([tuple(x) for x in self.tiles]))
+
     def __lt__(self, other):
         """
         Overload the less than operator so that ties can
@@ -106,7 +119,8 @@ class State:
             element is this state and the last element is the goal
         """
         from linkedlist import DoublyLinkedList
-        visited = {}
+        visited = set([])
+        on_frontier = set([])
         frontier = DoublyLinkedList()
         finished = False
         frontier.add_last(self)
@@ -115,10 +129,14 @@ class State:
         solution = []
         return solution
 
+
 state = State([[2, 8, 4], [5, " ", 7], [1, 3, 6]])
+print(state)
+"""
 print(state)
 print(state._find_blank())
 for n in state.get_neighbs():
     print(n, n.is_goal(), "\n\n")
-
+"""
+    
 state.solve()
