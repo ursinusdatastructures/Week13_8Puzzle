@@ -1,3 +1,5 @@
+from linkedlist import DoublyLinkedList
+
 class State:
     def __init__(self, tiles):
         """
@@ -11,7 +13,6 @@ class State:
         self.tiles = tiles
         self.prev = None
     
-
     def __repr__(self):
         """
         Returns
@@ -26,14 +27,8 @@ class State:
         return s
     
     def __eq__(self, other):
-        ret = True
-        N = len(self.tiles)
-        for i in range(N):
-            for j in range(N):
-                ret = ret and self.tiles[i][j] == other.tiles[i][j]
-        return ret
+        return str(self) == str(other)
     
-
     def __hash__(self):
         return hash(tuple([tuple(x) for x in self.tiles]))
 
@@ -72,22 +67,14 @@ class State:
         """
         res = True
         N = len(self.tiles)
-        count = 1
+        counter = 1
         for i in range(N):
             for j in range(N):
-                if count < N*N-1 and self.tiles[i][j] != count:
-                    res = False
-                count += 1
+                if i != N-1 or j != N-1:
+                    if self.tiles[i][j] != counter:
+                        res = False
+                counter += 1
         return res
-
-    def _find_blank(self):
-        N = len(self.tiles)
-        ret = (None, None)
-        for i in range(N):
-            for j in range(N):
-                if self.tiles[i][j] == " ":
-                    ret = (i, j)
-        return ret
 
     def get_neighbs(self):
         """
@@ -100,12 +87,24 @@ class State:
         """
         N = len(self.tiles)
         neighbs = []
-        (i, j) = self._find_blank()
-        for (i2, j2) in [(i, j-1), (i, j+1), (i-1, j), (i+1, j)]:
-            if i2 >= 0 and j2 >= 0 and i2 < N and j2 < N:
-                state = self.copy()
-                state.tiles[i][j], state.tiles[i2][j2] = state.tiles[i2][j2], state.tiles[i][j]
-                neighbs.append(state)
+        
+        ## Step 1: Find the row and col of the blank
+        row = 0
+        col = 0
+        for i in range(N):
+            for j in range(N):
+                if self.tiles[i][j] == " ":
+                    row = i
+                    col = j
+        
+        ## Step 2: Swap this index with every neighbor
+        ## that it can be swapped with
+        for [i, j] in [[row-1, col], [row+1, col], [row, col-1], [row, col+1]]:
+            if i >= 0 and j >= 0 and i < N and j < N:
+                n = self.copy()
+                ## Swap (row, col) with (i, j)
+                n.tiles[row][col], n.tiles[i][j] = n.tiles[i][j], n.tiles[row][col]
+                neighbs.append(n)
         return neighbs
     
     def solve(self):
@@ -118,25 +117,45 @@ class State:
             A path from this state to a goal state, where the first 
             element is this state and the last element is the goal
         """
-        from linkedlist import DoublyLinkedList
-        visited = set([])
-        on_frontier = set([])
-        frontier = DoublyLinkedList()
         finished = False
-        frontier.add_last(self)
-        # TODO: Fill this in
         
-        solution = []
+        frontier = DoublyLinkedList()
+        frontier.add_last(self)
+
+        on_frontier = set([self])
+        visited = set([])
+
+        # Each vertex passes through the frontier exactly once
+        v = None
+        while not finished and len(frontier) > 0: # O(V) iterations
+            print(len(frontier))
+            v = frontier.remove_first() #O(1)
+            visited.add(v) # O(1)
+            on_frontier.remove(v)
+            if v.is_goal():
+                finished = True
+            else:
+                # Look at each neighbor of v
+                for n in v.get_neighbs(): # 2E, or O(E) iterations over all
+                    # iterations of the outer loop
+                    # As many iterations as neighbors of v
+                    # Put a neighbor on the frontier
+                    # if it hasn't been visited yet
+                    if n not in on_frontier and n not in visited:
+                        # Switch to being on frontier, and add
+                        # to the back of the frontier
+                        on_frontier.add(n) # O(1)
+                        n.prev = v
+                        frontier.add_last(n) # O(1)
+        # TODO: Fill this in
+        solution = [v]
+        while v.prev:
+            v = v.prev
+            solution.append(v)
+        solution.reverse()
         return solution
 
-
-state = State([[2, 8, 4], [5, " ", 7], [1, 3, 6]])
-print(state)
-"""
-print(state)
-print(state._find_blank())
-for n in state.get_neighbs():
-    print(n, n.is_goal(), "\n\n")
-"""
-    
-state.solve()
+state = State([[5, 6, 8], [" ", 4, 7], [1, 3, 2]])
+solution = state.solve()
+for x in solution:
+    print(x, end="\n\n")
